@@ -64,6 +64,9 @@ public:
 	void FireWeapon();
 
 	void Die(int Killer, int Weapon);
+	void DieSpikes(int tile);
+	void Hit(int Killer, int Weapon);
+	void TakeHammerHit(CCharacter *pFrom);
 	bool TakeDamage(vec2 Force, int Dmg, int From, int Weapon);
 
 	bool Spawn(class CPlayer *pPlayer, vec2 Pos);
@@ -102,7 +105,7 @@ private:
 	int m_LastWeapon;
 	int m_QueuedWeapon;
 
-	int m_ReloadTimer;
+	int m_ReloadTimer[NUM_WEAPONS];
 	int m_AttackTick;
 
 	int m_DamageTaken;
@@ -173,6 +176,7 @@ public:
 	bool Freeze(int Seconds);
 	bool Freeze();
 	bool UnFreeze();
+	bool IsFrozen();
 	void GiveAllWeapons();
 	void ResetPickups();
 	int m_DDRaceState;

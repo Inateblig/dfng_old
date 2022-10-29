@@ -827,6 +827,8 @@ bool CCollision::TileExists(int Index) const
 		return true;
 	if(m_pTele && (m_pTele[Index].m_Type == TILE_TELEIN || m_pTele[Index].m_Type == TILE_TELEINEVIL || m_pTele[Index].m_Type == TILE_TELECHECKINEVIL || m_pTele[Index].m_Type == TILE_TELECHECK || m_pTele[Index].m_Type == TILE_TELECHECKIN))
 		return true;
+	if (m_pTiles[Index].m_Index >= TILE_SPIKE_FIRST && m_pTiles[Index].m_Index <= TILE_SPIKE_LAST)
+		return true;
 	if(m_pSpeedup && m_pSpeedup[Index].m_Force > 0)
 		return true;
 	if(m_pDoor && m_pDoor[Index].m_Index)

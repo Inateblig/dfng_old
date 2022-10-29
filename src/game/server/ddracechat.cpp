@@ -1029,6 +1029,8 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 		else
 		{
 			int Team = pResult->GetInteger(0);
+			/* use only some teams so their colors are distinguishable */
+			Team = (Team / 10) % 10 * 10 + !!Team;
 
 			if(Team < 0 || Team >= MAX_CLIENTS)
 				Team = pController->m_Teams.GetFirstEmptyTeam();

@@ -1015,6 +1015,7 @@ void CGameTeams::ProcessSaveTeam()
 
 void CGameTeams::OnCharacterSpawn(int ClientID)
 {
+	return;
 	m_Core.SetSolo(ClientID, false);
 	int Team = m_Core.Team(ClientID);
 
@@ -1033,6 +1034,7 @@ void CGameTeams::OnCharacterSpawn(int ClientID)
 
 void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 {
+	return;
 	m_Core.SetSolo(ClientID, false);
 
 	int Team = m_Core.Team(ClientID);

@@ -208,6 +208,7 @@ public:
 	void CreateDeath(vec2 Pos, int ClientID, int64_t Mask = -1);
 	void CreateSound(vec2 Pos, int Sound, int64_t Mask = -1);
 	void CreateSoundGlobal(int Sound, int Target = -1);
+	void MakeLaserTextPoints(vec2 pPos, int pOwner, int pPoints);
 
 	enum
 	{

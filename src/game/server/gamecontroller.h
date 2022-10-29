@@ -67,6 +67,7 @@ public:
 
 	IGameController(class CGameContext *pGameServer);
 	virtual ~IGameController();
+	virtual void DoWinCheck();
 
 	// event
 	/*

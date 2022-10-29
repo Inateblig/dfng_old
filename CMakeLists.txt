@@ -2299,6 +2299,8 @@ if(SERVER)
     upnp.h
   )
   set_src(GAME_SERVER GLOB_RECURSE src/game/server
+    laserText.cpp
+    laserText.h
     alloc.h
     ddracechat.cpp
     ddracecommands.cpp

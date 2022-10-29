@@ -102,12 +102,12 @@ float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam)
 	CCharacter *pC = static_cast<CCharacter *>(GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER));
 	for(; pC; pC = (CCharacter *)pC->TypeNext())
 	{
-		// ignore players in other teams
-		if(GameServer()->GetDDRaceTeam(pC->GetPlayer()->GetCID()) != DDTeam)
-			continue;
+		float Scoremod = 1.0f;
+		if (DDTeam != 0 && pC->GetPlayer()->GetTeam() == DDTeam)
+			Scoremod = -0.5f; /* closer to team mates */
 
 		float d = distance(Pos, pC->m_Pos);
-		Score += d == 0 ? 1000000000.0f : 1.0f / d;
+		Score += Scoremod * (d == 0 ? 1000000000.0f : 1.0f / d);
 	}
 
 	return Score;
@@ -115,47 +115,40 @@ float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam)
 
 void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
 {
-	// j == 0: Find an empty slot, j == 1: Take any slot if no empty one found
-	for(int j = 0; j < 2 && !pEval->m_Got; j++)
+	// get spawn point
+	for(int i = 0; i < m_aNumSpawnPoints[Type]; i++)
 	{
-		// get spawn point
-		for(int i = 0; i < m_aNumSpawnPoints[Type]; i++)
+		vec2 P = m_aaSpawnPoints[Type][i];
+
+		// check if the position is occupado
+		CCharacter *apEnts[MAX_CLIENTS];
+		int Num = GameServer()->m_World.FindEntities(m_aaSpawnPoints[Type][i], 64, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+		vec2 aPositions[5] = {vec2(0.0f, 0.0f), vec2(-32.0f, 0.0f), vec2(0.0f, -32.0f), vec2(32.0f, 0.0f), vec2(0.0f, 32.0f)}; // start, left, up, right, down
+		int Result = -1;
+		for(int Index = 0; Index < 5 && Result == -1; ++Index)
 		{
-			vec2 P = m_aaSpawnPoints[Type][i];
-
-			if(j == 0)
-			{
-				// check if the position is occupado
-				CCharacter *apEnts[MAX_CLIENTS];
-				int Num = GameServer()->m_World.FindEntities(m_aaSpawnPoints[Type][i], 64, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
-				vec2 aPositions[5] = {vec2(0.0f, 0.0f), vec2(-32.0f, 0.0f), vec2(0.0f, -32.0f), vec2(32.0f, 0.0f), vec2(0.0f, 32.0f)}; // start, left, up, right, down
-				int Result = -1;
-				for(int Index = 0; Index < 5 && Result == -1; ++Index)
+			Result = Index;
+			if(!GameServer()->m_World.m_Core.m_aTuning[0].m_PlayerCollision)
+				break;
+			for(int c = 0; c < Num; ++c)
+				if(GameServer()->Collision()->CheckPoint(m_aaSpawnPoints[Type][i] + aPositions[Index]) ||
+					distance(apEnts[c]->m_Pos, m_aaSpawnPoints[Type][i] + aPositions[Index]) <= apEnts[c]->GetProximityRadius())
 				{
-					Result = Index;
-					if(!GameServer()->m_World.m_Core.m_aTuning[0].m_PlayerCollision)
-						break;
-					for(int c = 0; c < Num; ++c)
-						if(GameServer()->Collision()->CheckPoint(m_aaSpawnPoints[Type][i] + aPositions[Index]) ||
-							distance(apEnts[c]->m_Pos, m_aaSpawnPoints[Type][i] + aPositions[Index]) <= apEnts[c]->GetProximityRadius())
-						{
-							Result = -1;
-							break;
-						}
+					Result = -1;
+					break;
 				}
-				if(Result == -1)
-					continue; // try next spawn point
+		}
+		if(Result == -1)
+			continue; // try next spawn point
 
-				P += aPositions[Result];
-			}
+		P += aPositions[Result];
 
-			float S = EvaluateSpawnPos(pEval, P, DDTeam);
-			if(!pEval->m_Got || (j == 0 && pEval->m_Score > S))
-			{
-				pEval->m_Got = true;
-				pEval->m_Score = S;
-				pEval->m_Pos = P;
-			}
+		float S = EvaluateSpawnPos(pEval, P, DDTeam);
+		if(!pEval->m_Got || pEval->m_Score > S)
+		{
+			pEval->m_Got = true;
+			pEval->m_Score = S;
+			pEval->m_Pos = P;
 		}
 	}
 }
@@ -466,6 +459,9 @@ void IGameController::StartRound()
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "start round type='%s' teamplay='%d'", m_pGameType, m_GameFlags & GAMEFLAG_TEAMS);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+	for(auto &pPlayer : GameServer()->m_apPlayers)
+		if(pPlayer)
+			pPlayer->m_Score = 0;
 }
 
 void IGameController::ChangeMap(const char *pToMap)
@@ -482,6 +478,40 @@ void IGameController::OnReset()
 
 int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
+	CCharacter *kch;
+	int s = 0; /* score */
+
+	if (!pKiller || Weapon == WEAPON_GAME)
+		return 0;
+	if (pKiller == pVictim->GetPlayer() && Weapon == WEAPON_SELF) {
+		pVictim->GetPlayer()->m_Score--; /* selfkill */
+		return 0;
+	}
+	if (Weapon <= NUM_WEAPONS) /* not death from spikes */
+		return 0;
+
+	Weapon -= NUM_WEAPONS;
+	#define CASE_SPIKE(C)\
+		case TILE_SPIKE_##C:\
+			s = g_Config.m_SvScoreSpike##C;\
+			break
+	switch (Weapon) {
+		CASE_SPIKE(RED);
+		CASE_SPIKE(ORANGE);
+		CASE_SPIKE(YELLOW);
+		CASE_SPIKE(GREEN);
+		CASE_SPIKE(LBLUE);
+		CASE_SPIKE(BLUE);
+		CASE_SPIKE(PURPLE);
+		CASE_SPIKE(PINK);
+		CASE_SPIKE(WHITE);
+		CASE_SPIKE(BLACK);
+	}
+	#undef SPIKESOCRE
+	pKiller->m_Score += s;
+	if ((kch = pKiller->GetCharacter()))
+		GameServer()->MakeLaserTextPoints(kch->m_Pos, pKiller->GetCID(), s);
+
 	return 0;
 }
 
@@ -492,7 +522,7 @@ void IGameController::OnCharacterSpawn(class CCharacter *pChr)
 
 	// give default weapons
 	pChr->GiveWeapon(WEAPON_HAMMER);
-	pChr->GiveWeapon(WEAPON_GUN);
+	pChr->GiveWeapon(WEAPON_LASER);
 }
 
 void IGameController::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
@@ -539,6 +569,7 @@ void IGameController::Tick()
 	}
 
 	DoActivityCheck();
+	DoWinCheck();
 }
 
 void IGameController::Snap(int SnappingClient)
@@ -558,6 +589,7 @@ void IGameController::Snap(int SnappingClient)
 	pGameInfoObj->m_RoundStartTick = m_RoundStartTick;
 	pGameInfoObj->m_WarmupTimer = m_Warmup;
 
+	pGameInfoObj->m_ScoreLimit = g_Config.m_SvScorelimit;
 	pGameInfoObj->m_RoundNum = 0;
 	pGameInfoObj->m_RoundCurrent = m_RoundCount + 1;
 
@@ -587,8 +619,6 @@ void IGameController::Snap(int SnappingClient)
 		return;
 
 	pGameInfoEx->m_Flags =
-		GAMEINFOFLAG_TIMESCORE |
-		GAMEINFOFLAG_GAMETYPE_RACE |
 		GAMEINFOFLAG_GAMETYPE_DDRACE |
 		GAMEINFOFLAG_GAMETYPE_DDNET |
 		GAMEINFOFLAG_UNLIMITED_AMMO |
@@ -602,8 +632,8 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_PREDICT_DDRACE_TILES |
 		GAMEINFOFLAG_ENTITIES_DDNET |
 		GAMEINFOFLAG_ENTITIES_DDRACE |
-		GAMEINFOFLAG_ENTITIES_RACE |
-		GAMEINFOFLAG_RACE;
+		GAMEINFOFLAG_GAMETYPE_FNG |
+		GAMEINFOFLAG_PREDICT_FNG;
 	pGameInfoEx->m_Flags2 = GAMEINFOFLAG2_HUD_DDRACE;
 	if(g_Config.m_SvNoWeakHookAndBounce)
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK_AND_BOUNCE;
@@ -759,4 +789,32 @@ void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
 	// OnPlayerInfoChange(pPlayer);
+}
+
+void IGameController::DoWinCheck()
+{
+	if(m_GameOverTick == -1 && !m_Warmup && !GameServer()->m_World.m_ResetRequested)
+	{
+		// gather some stats
+		int Topscore = 0;
+		int TopscoreCount = 0;
+		for(int i = 0; i < MAX_CLIENTS; i++) {
+			if(GameServer()->m_apPlayers[i]) {
+				if(GameServer()->m_apPlayers[i]->m_Score > Topscore) {
+					Topscore = GameServer()->m_apPlayers[i]->m_Score;
+					TopscoreCount = 1;
+				}
+				else if(GameServer()->m_apPlayers[i]->m_Score == Topscore)
+					TopscoreCount++;
+				}
+		}
+		// check score win condition
+		if((g_Config.m_SvScorelimit > 0 && Topscore >= g_Config.m_SvScorelimit) ||
+		(g_Config.m_SvTimelimit > 0 && (Server()->Tick()-m_RoundStartTick) >= g_Config.m_SvTimelimit*Server()->TickSpeed()*60)) {
+			if(TopscoreCount == 1)
+					EndRound();
+			else
+				m_SuddenDeath = 1;
+		}
+	}
 }

@@ -30,6 +30,7 @@
 #include "gamemodes/DDRace.h"
 #include "player.h"
 #include "score.h"
+#include "laserText.h"
 
 // Not thread-safe!
 class CClientChatLogger : public ILogger
@@ -365,6 +366,16 @@ void CGameContext::CreateSoundGlobal(int Sound, int Target)
 			Flag |= MSGFLAG_NORECORD;
 		Server()->SendPackMsg(&Msg, Flag, Target);
 	}
+}
+
+void
+CGameContext::MakeLaserTextPoints(vec2 pPos, int pOwner, int pPoints)
+{
+	char text[10];
+	if(pPoints >= 0) str_format(text, 10, "+%d", pPoints);
+	else str_format(text, 10, "%d", pPoints);
+	pPos.y -= 20.0 * 2.5;
+	new CLaserText(&m_World, pPos, pOwner, Server()->TickSpeed() * 3, text, (int)(strlen(text)));
 }
 
 void CGameContext::CallVote(int ClientID, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc)
@@ -2341,7 +2352,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 				// reload scores
 				Score()->PlayerData(ClientID)->Reset();
-				m_apPlayers[ClientID]->m_Score = -9999;
+				m_apPlayers[ClientID]->m_Score = 0;
 				Score()->LoadPlayerData(ClientID);
 
 				SixupNeedsUpdate = true;
