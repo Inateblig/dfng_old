@@ -65,4 +65,6 @@ CHAT_COMMAND("teleport", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTe
 
 CHAT_COMMAND("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)")
 
+CHAT_COMMAND("ddhammer", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConDDHammer, this, "Whether to use ddrace hammer (off by default), optional i = 0 for off else for on")
+
 #undef CHAT_COMMAND

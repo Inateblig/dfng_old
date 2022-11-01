@@ -2442,19 +2442,40 @@ void CCharacter::TakeHammerHit(CCharacter *pFrom)
 	vec2 Dir;
 	int t, cid, from;
 
-	if (length(m_Pos - pFrom->m_Pos) > 0.0f)
-		Dir = normalize(m_Pos - pFrom->m_Pos);
-	else
-		Dir = vec2(0.f, -1.f);
-
-	vec2 Push = vec2(0.f, -1.f) + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
-	Push.x *= g_Config.m_SvHammerScaleX*0.01f;
-	Push.y *= g_Config.m_SvHammerScaleY*0.01f;
-	m_Core.m_Vel += Push;
-
 	cid = m_pPlayer->GetCID();
 	from = pFrom->m_pPlayer->GetCID();
 	m_Core.m_Killer = from;
+
+	if (!pFrom->m_pPlayer->m_DDHammer) {
+		if (length(m_Pos - pFrom->m_Pos) > 0.0f)
+			Dir = normalize(m_Pos - pFrom->m_Pos);
+		else
+			Dir = vec2(0.f, -1.f);
+
+		vec2 Push = vec2(0.f, -1.f) + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+		Push.x *= g_Config.m_SvHammerScaleX*0.01f;
+		Push.y *= g_Config.m_SvHammerScaleY*0.01f;
+		m_Core.m_Vel += Push;
+
+	} else {
+		if(length(m_Pos - pFrom->m_Pos) > 0.0f)
+			Dir = normalize(m_Pos - pFrom->m_Pos);
+		else
+			Dir = vec2(0.f, -1.f);
+
+		float Strength;
+		if(!m_TuneZone)
+			Strength = GameServer()->Tuning()->m_HammerStrength;
+		else
+			Strength = GameServer()->TuningList()[m_TuneZone].m_HammerStrength;
+
+		vec2 Temp = m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+		Temp = ClampVel(m_MoveRestrictions, Temp);
+		Temp -= m_Core.m_Vel;
+		TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
+			m_pPlayer->GetCID(), m_Core.m_ActiveWeapon);
+	}
 	if ((t = Teams()->m_Core.Team(cid)) == Teams()->m_Core.Team(from) && t != TEAM_FLOCK)
 		UnFreeze();
+
 }

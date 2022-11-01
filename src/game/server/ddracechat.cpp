@@ -1602,3 +1602,31 @@ void CGameContext::ConTimeCP(IConsole::IResult *pResult, void *pUserData)
 	const char *pName = pResult->GetString(0);
 	pSelf->Score()->LoadPlayerData(pResult->m_ClientID, pName);
 }
+
+void CGameContext::ConDDHammer(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+
+	if(pResult->NumArguments())
+	{
+		if(pPlayer->m_DDHammer == (bool)pResult->GetInteger(0))
+			return;
+
+		pPlayer->m_DDHammer = pResult->GetInteger(0);
+	}
+	else
+	{
+		pPlayer->m_DDHammer = !pPlayer->m_DDHammer;
+	}
+
+	if(pPlayer->m_DDHammer)
+		pSelf->SendChatTarget(pResult->m_ClientID, "You will now use ddrace hammer on this server");
+	else
+		pSelf->SendChatTarget(pResult->m_ClientID, "You will no longer use ddrace hammer on this server");
+}

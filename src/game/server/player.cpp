@@ -145,6 +145,8 @@ void CPlayer::Reset()
 	m_VotedForPractice = false;
 	m_SwapTargetsClientID = -1;
 	m_BirthdayAnnounced = false;
+
+	m_DDHammer = g_Config.m_SvDDHammerDefault;
 }
 
 static int PlayerFlags_SixToSeven(int Flags)
