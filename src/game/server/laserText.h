@@ -1,7 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#ifndef GAME_SERVER_ENTITIES_LASER_H
-#define GAME_SERVER_ENTITIES_LASER_H
+#ifndef GAME_SERVER_LASERTEXT_H
+#define GAME_SERVER_LASERTEXT_H
 
 #include <game/server/entity.h>
 
@@ -33,10 +33,10 @@ public:
 		delete[] m_Chars;
 	}
 
-	virtual void Reset();
-	virtual void Tick();
-	virtual void TickPaused();
-	virtual void Snap(int SnappingClient);
+	virtual void Reset() override;
+	virtual void Tick() override;
+	virtual void TickPaused() override;
+	virtual void Snap(int SnappingClient) override;
 
 private:
 	float m_PosOffsetCharPoints;
