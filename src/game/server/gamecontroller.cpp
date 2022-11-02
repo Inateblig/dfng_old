@@ -103,7 +103,7 @@ float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam)
 	for(; pC; pC = (CCharacter *)pC->TypeNext())
 	{
 		float Scoremod = 1.0f;
-		if (DDTeam != 0 && pC->GetPlayer()->GetTeam() == DDTeam)
+		if(DDTeam != 0 && pC->GetPlayer()->GetTeam() == DDTeam)
 			Scoremod = -0.5f; /* closer to team mates */
 
 		float d = distance(Pos, pC->m_Pos);
@@ -481,21 +481,23 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 	CCharacter *kch;
 	int s = 0; /* score */
 
-	if (!pKiller || Weapon == WEAPON_GAME)
+	if(!pKiller || Weapon == WEAPON_GAME)
 		return 0;
-	if (pKiller == pVictim->GetPlayer() && Weapon == WEAPON_SELF) {
+	if(pKiller == pVictim->GetPlayer() && Weapon == WEAPON_SELF)
+	{
 		pVictim->GetPlayer()->m_Score--; /* selfkill */
 		return 0;
 	}
-	if (Weapon <= NUM_WEAPONS) /* not death from spikes */
+	if(Weapon <= NUM_WEAPONS) /* not death from spikes */
 		return 0;
 
 	Weapon -= NUM_WEAPONS;
-	#define CASE_SPIKE(C)\
-		case TILE_SPIKE_##C:\
-			s = g_Config.m_SvScoreSpike##C;\
-			break
-	switch (Weapon) {
+#define CASE_SPIKE(C) \
+	case TILE_SPIKE_##C: \
+		s = g_Config.m_SvScoreSpike##C; \
+		break
+	switch(Weapon)
+	{
 		CASE_SPIKE(RED);
 		CASE_SPIKE(ORANGE);
 		CASE_SPIKE(YELLOW);
@@ -507,9 +509,9 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 		CASE_SPIKE(WHITE);
 		CASE_SPIKE(BLACK);
 	}
-	#undef SPIKESOCRE
+#undef SPIKESOCRE
 	pKiller->m_Score += s;
-	if ((kch = pKiller->GetCharacter()))
+	if((kch = pKiller->GetCharacter()))
 		GameServer()->MakeLaserTextPoints(kch->m_Pos, pKiller->GetCID(), s);
 
 	return 0;
@@ -798,21 +800,25 @@ void IGameController::DoWinCheck()
 		// gather some stats
 		int Topscore = 0;
 		int TopscoreCount = 0;
-		for(int i = 0; i < MAX_CLIENTS; i++) {
-			if(GameServer()->m_apPlayers[i]) {
-				if(GameServer()->m_apPlayers[i]->m_Score > Topscore) {
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(GameServer()->m_apPlayers[i])
+			{
+				if(GameServer()->m_apPlayers[i]->m_Score > Topscore)
+				{
 					Topscore = GameServer()->m_apPlayers[i]->m_Score;
 					TopscoreCount = 1;
 				}
 				else if(GameServer()->m_apPlayers[i]->m_Score == Topscore)
 					TopscoreCount++;
-				}
+			}
 		}
 		// check score win condition
 		if((g_Config.m_SvScorelimit > 0 && Topscore >= g_Config.m_SvScorelimit) ||
-		(g_Config.m_SvTimelimit > 0 && (Server()->Tick()-m_RoundStartTick) >= g_Config.m_SvTimelimit*Server()->TickSpeed()*60)) {
+			(g_Config.m_SvTimelimit > 0 && (Server()->Tick() - m_RoundStartTick) >= g_Config.m_SvTimelimit * Server()->TickSpeed() * 60))
+		{
 			if(TopscoreCount == 1)
-					EndRound();
+				EndRound();
 			else
 				m_SuddenDeath = 1;
 		}

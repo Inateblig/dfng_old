@@ -5,10 +5,14 @@
 
 #include <game/server/entity.h>
 
-class CLaserChar : public CEntity {
+class CLaserChar : public CEntity
+{
 public:
-	CLaserChar(CGameWorld *pGameWorld) : CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER) {
+	CLaserChar(CGameWorld *pGameWorld) :
+		CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
+	{
 	}
+
 public:
 	int getID() { return m_ID; }
 	vec2 m_Frompos;
@@ -17,12 +21,14 @@ public:
 class CLaserText : public CEntity
 {
 public:
-	CLaserText(CGameWorld *pGameWorld, vec2 Pos, int Owner, int pAliveTicks, char* pText, int pTextLen);
-	CLaserText(CGameWorld *pGameWorld, vec2 Pos, int Owner, int pAliveTicks, char* pText, int pTextLen, float pCharPointOffset, float pCharOffsetFactor);
-	virtual ~CLaserText(){
+	CLaserText(CGameWorld *pGameWorld, vec2 Pos, int Owner, int pAliveTicks, char *pText, int pTextLen);
+	CLaserText(CGameWorld *pGameWorld, vec2 Pos, int Owner, int pAliveTicks, char *pText, int pTextLen, float pCharPointOffset, float pCharOffsetFactor);
+	virtual ~CLaserText()
+	{
 		delete[] m_Text;
-		for(int i = 0; i < m_CharNum; ++i) {
-			delete (CLaserChar*)m_Chars[i];
+		for(int i = 0; i < m_CharNum; ++i)
+		{
+			delete(CLaserChar *)m_Chars[i];
 		}
 		delete[] m_Chars;
 	}
@@ -36,7 +42,7 @@ private:
 	float m_PosOffsetCharPoints;
 	float m_PosOffsetChars;
 
-	void makeLaser(char pChar, int pCharOffset, int& charCount);
+	void makeLaser(char pChar, int pCharOffset, int &charCount);
 
 	int m_Owner;
 
@@ -44,10 +50,10 @@ private:
 	int m_CurTicks;
 	int m_StartTick;
 
-	char* m_Text;
+	char *m_Text;
 	int m_TextLen;
 
-	CLaserChar** m_Chars;
+	CLaserChar **m_Chars;
 	int m_CharNum;
 };
 
