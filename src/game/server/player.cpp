@@ -375,7 +375,7 @@ void CPlayer::Snap(int SnappingClient)
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_ADMIN;
 
 		// Times are in milliseconds for 0.7
-//		pPlayerInfo->m_Score = Score == -9999 ? -1 : -Score * 1000;
+		// pPlayerInfo->m_Score = Score == -9999 ? -1 : -Score * 1000;
 		pPlayerInfo->m_Latency = Latency;
 	}
 
@@ -563,9 +563,9 @@ CCharacter *CPlayer::GetCharacter()
 
 void CPlayer::KillCharacter(int Weapon)
 {
-	if (!m_pCharacter)
+	if(!m_pCharacter)
 		return;
-	if (Weapon == WEAPON_SELF && m_pCharacter->m_FreezeTime)
+	if(Weapon == WEAPON_SELF && m_pCharacter->m_FreezeTime)
 		return;
 	m_pCharacter->Die(m_ClientID, Weapon);
 	delete m_pCharacter;
@@ -592,7 +592,7 @@ CCharacter *CPlayer::ForceSpawn(vec2 Pos)
 
 void CPlayer::SetTeam(int Team, bool DoChatMsg)
 {
-	if (m_pCharacter && m_pCharacter->m_FreezeTime && Team == TEAM_SPECTATORS)
+	if(m_pCharacter && m_pCharacter->m_FreezeTime && Team == TEAM_SPECTATORS)
 		return;
 	KillCharacter();
 

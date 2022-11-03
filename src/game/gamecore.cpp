@@ -661,7 +661,7 @@ void CCharacterCore::SetHookedPlayer(int HookedPlayer)
 			CCharacterCore *pCharCore = m_pWorld->m_apCharacters[HookedPlayer];
 			if(pCharCore)
 			{
-				if (pCharCore->m_AttachedPlayers.empty())
+				if(pCharCore->m_AttachedPlayers.empty())
 					pCharCore->m_Killer = m_Id;
 				pCharCore->m_AttachedPlayers.insert(m_Id);
 			}

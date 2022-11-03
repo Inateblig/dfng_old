@@ -65,7 +65,7 @@ public:
 
 	void Die(int Killer, int Weapon);
 	void DieSpikes(int tile);
-	void Hit(int Killer, int Weapon);
+	void Hit(int From, int Weapon);
 	void TakeHammerHit(CCharacter *pFrom);
 	bool TakeDamage(vec2 Force, int Dmg, int From, int Weapon);
 

@@ -28,9 +28,9 @@
 
 #include "entities/character.h"
 #include "gamemodes/DDRace.h"
+#include "laserText.h"
 #include "player.h"
 #include "score.h"
-#include "laserText.h"
 
 // Not thread-safe!
 class CClientChatLogger : public ILogger
@@ -368,12 +368,13 @@ void CGameContext::CreateSoundGlobal(int Sound, int Target)
 	}
 }
 
-void
-CGameContext::MakeLaserTextPoints(vec2 pPos, int pOwner, int pPoints)
+void CGameContext::MakeLaserTextPoints(vec2 pPos, int pOwner, int pPoints)
 {
 	char text[10];
-	if(pPoints >= 0) str_format(text, 10, "+%d", pPoints);
-	else str_format(text, 10, "%d", pPoints);
+	if(pPoints >= 0)
+		str_format(text, 10, "+%d", pPoints);
+	else
+		str_format(text, 10, "%d", pPoints);
 	pPos.y -= 20.0 * 2.5;
 	new CLaserText(&m_World, pPos, pOwner, Server()->TickSpeed() * 3, text, (int)(strlen(text)));
 }
