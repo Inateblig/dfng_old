@@ -800,7 +800,7 @@ void IGameController::DoWinCheck()
 		// gather some stats
 		int Topscore = 0;
 		int TopscoreCount = 0;
-		for(auto & m_apPlayer : GameServer()->m_apPlayers)
+		for(auto &m_apPlayer : GameServer()->m_apPlayers)
 		{
 			if(m_apPlayer)
 			{

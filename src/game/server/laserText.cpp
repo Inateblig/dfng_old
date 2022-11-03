@@ -1,9 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "laserText.h"
+#include <cstring>
 #include <game/generated/protocol.h>
 #include <game/server/gamecontext.h>
-#include <cstring>
 
 static const bool T = true;
 static const bool F = false;
