@@ -281,8 +281,8 @@ void CCharacter::HandleNinja()
 					continue;
 
 				// Don't hit players in other teams
-				//				if(Team() != apEnts[i]->Team())
-				//					continue;
+				// if(Team() != apEnts[i]->Team())
+				// 	continue;
 
 				// Don't hit players in solo parts
 				if(Teams()->m_Core.GetSolo(apEnts[i]->m_pPlayer->GetCID()))
@@ -461,27 +461,27 @@ void CCharacter::FireWeapon()
 			else
 				GameServer()->CreateHammerHit(ProjStartPos, TeamMask());
 
-			//			vec2 Dir;
-			//			if(length(pTarget->m_Pos - m_Pos) > 0.0f)
-			//				Dir = normalize(pTarget->m_Pos - m_Pos);
-			//			else
-			//				Dir = vec2(0.f, -1.f);
-			//
-			//			float Strength;
-			//			if(!m_TuneZone)
-			//				Strength = GameServer()->Tuning()->m_HammerStrength;
-			//			else
-			//				Strength = GameServer()->TuningList()[m_TuneZone].m_HammerStrength;
-			//
-			//			vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
-			//			Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
-			//			Temp -= pTarget->m_Core.m_Vel;
-			//			pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
-			//				m_pPlayer->GetCID(), m_Core.m_ActiveWeapon);
-			//			pTarget->UnFreeze();
-			//
-			//			if(m_FreezeHammer)
-			//				pTarget->Freeze();
+			// vec2 Dir;
+			// if(length(pTarget->m_Pos - m_Pos) > 0.0f)
+			// 	Dir = normalize(pTarget->m_Pos - m_Pos);
+			// else
+			// 	Dir = vec2(0.f, -1.f);
+
+			// float Strength;
+			// if(!m_TuneZone)
+			// 	Strength = GameServer()->Tuning()->m_HammerStrength;
+			// else
+			// 	Strength = GameServer()->TuningList()[m_TuneZone].m_HammerStrength;
+
+			// vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+			// Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
+			// Temp -= pTarget->m_Core.m_Vel;
+			// pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
+			// 	m_pPlayer->GetCID(), m_Core.m_ActiveWeapon);
+			// pTarget->UnFreeze();
+
+			// if(m_FreezeHammer)
+			// 	pTarget->Freeze();
 			Antibot()->OnHammerHit(m_pPlayer->GetCID(), pTarget->GetPlayer()->GetCID());
 			pTarget->TakeHammerHit(this);
 			Hits++;
@@ -2358,8 +2358,8 @@ void CCharacter::DieSpikes(int tile)
 
 	plrid = m_pPlayer->GetCID();
 	// if the player leaves the game, he will be nullptr and we handle it like a selfkill
-	//	if (plrid == -1 || !GameServer()->m_apPlayers[plrid])
-	//		plrid = m_pPlayer->GetCID();
+	// if (plrid == -1 || !GameServer()->m_apPlayers[plrid])
+	// 	plrid = m_pPlayer->GetCID();
 
 	if(!IsFrozen() || m_Core.m_Killer < 0)
 	{
